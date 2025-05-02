@@ -1,0 +1,29 @@
+\documentclass[dvipdfmx]{jsarticle}
+
+% 数式
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{bm}
+\usepackage{physics}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable} % 必要に応じて
+
+\newtcolorbox{mybox}[1][]{%
+  title=#1,
+  fonttitle=\gtfamily\sffamily\bfseries,
+  colframe=blue,
+  colback=blue!3!,
+  breakable, % 長文対応したい場合
+}
+
+
+\begin{document}
+\section{なんで分配関数を計算するのか？}
+
+\begin{mybox}[三章前半のゴール：汎化損失$G_n$が$n\to\infty$の極限でどのような振る舞いをするかを知る]
+\begin{equation}
+    G_n = L(\omega_0) + \frac{1}{n}\qty(\frac{d}{2\beta} + \frac{1}{2}\abs{\xi}^2 - \frac{1}{2\beta}\tr(IJ^{-1})) + \mathrm{o_p}\qty(\frac{1}{n})
+\end{equation}    
+\end{mybox}
+
+
+\end{document}
