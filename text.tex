@@ -1,0 +1,24 @@
+\documentclass{article}
+\usepackage{ifxetex}
+\usepackage{ifluatex}
+\begin{document}
+
+使用中のLaTeX処理系は：
+
+\begingroup
+\def\engine{}
+\ifxetex
+  \def\engine{XeTeX}
+\else\ifluatex
+  \def\engine{LuaTeX}
+\else
+  \ifdefined\kanjiskip
+    \def\engine{(u)pTeX}
+  \else
+    \def\engine{pdfTeX}
+  \fi
+\fi\fi
+\texttt{\engine}
+\endgroup
+
+\end{document}

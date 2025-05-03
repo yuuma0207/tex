@@ -1,2 +1,4 @@
 *.dvi
 *.synctex.gz
+
+.DS_Store
