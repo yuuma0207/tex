@@ -75,8 +75,8 @@ $K_n(w)$の確率的な振る舞い（すなわち$f(X, w)$の確率的な振る
 しかし、それが対数関数の中に入っているため、$G_n$を直接計算することは難しそうだ。
 途中まで計算を進めてみると、
 \begin{align}
-    G_n &= -\mathbb{E}_X\qty[\ln(\ev{p(X|w)}_{w|X^n})] = -\mathbb{E}_X\qty[\ln{p(X|w_0)} - \ln\ev{\frac{p(X|w_0)}{p(X|w)}}_{w|X^n}] \notag \\
-    &= -\mathbb{E}_X\qty[\ln(p(X|w_0))] + \mathbb{E}_X\qty[\ln\ev{e^{f(X,w)}}_{w|X^n}] 
+    G_n &= -\mathbb{E}_X\qty[\ln(\ev{p(X|w)}_{w|X^n})] = -\mathbb{E}_X\qty[\ln\ev{e^{\ln{\frac{p(X|w)}{p(X|w_0)}} + \ln{p(X|w_0)}}}_{w|X^n}] \notag \\
+    &= -\mathbb{E}_X\qty[\ln(p(X|w_0))] - \mathbb{E}_X\qty[\ln\ev{e^{-f(X,w)}}_{w|X^n}] 
 \end{align}
 という形になる。右辺第一項は$L(w_0)$そのものである。第二項の計算が難しいのだが、ログをなくすためにはTaylor展開$\ln(1+x) = x - x^2/2 + \cdots$を適用すれば良いことに気づく。
 確率変数$X$に対して、$X^2$までの項の寄与を考えると
@@ -86,19 +86,19 @@ $K_n(w)$の確率的な振る舞い（すなわち$f(X, w)$の確率的な振る
 \end{equation}
 が成り立つので、
 \begin{equation}
-    \ln\ev{e^{f(X,w)}}_{w|X^n} = \ev{f(X,w)}_{w|X^n} + \frac{1}{2}\mathbb{V}[f(X,w)]
+    \ln\ev{e^{-f(X,w)}}_{w|X^n} = -\ev{f(X,w)}_{w|X^n} + \frac{1}{2}\mathbb{V}[f(X,w)]
     \label{eq:taylor}
 \end{equation}
 という形になる。$\mathbb{V}[f(X,w)]$は分散である。
 次章で示すのだが、$G_n = -\mathcal{G}_n(1)$の関係式を用いた計算は、上記のTaylor展開を用いた計算と全く同じ結果を得るらしい。その結果を先に述べておく：
 \begin{equation}
-    G_n = L(w_0) + \frac{1}{n}\qty(\ev{nK(w)}_{w|X^n} - \frac{1}{2}\mathbb{E}_X\qty[\mathbb{V}[nf(X,w)]]) + \mathrm{o_p}\qty(\frac{1}{n})\;。
+    G_n = L(w_0) + \frac{1}{n}\qty(n\ev{K(w)}_{w|X^n} - \frac{n}{2}\mathbb{E}_X\qty[\mathbb{V}[f(X,w)]]) + \mathrm{o_p}\qty(\frac{1}{n})\;。
 \end{equation}
 ここで
 \begin{equation}
     K(w) = \mathbb{E}_X\qty[f(X,w)],\qquad \mathbb{V}[f(X,w)] = \ev{f(X,w)^2}_{w|X^n} - \ev{f(X,w)}_{w|X^n}^2
 \end{equation}
-であるため、$\mathcal{G}_n(1)$を用いた計算は式\eqref{eq:taylor}と同じ形（なぜか分散の符号が逆）になっている。
+であるため、$\mathcal{G}_n(1)$を用いた計算は式\eqref{eq:taylor}と同じ形になっている。
 さて、ここまで計算できれば、あとは$f(X,w)$の確率的な振る舞いがどのようなものかを解析すれば良い。
 
 \section{Taylor展開の正当化}
@@ -141,9 +141,9 @@ $K_n(w)$の確率的な振る舞い（すなわち$f(X, w)$の確率的な振る
 \end{align}
 となる。したがって式\eqref{eq:gn2}の右辺を計算すると、
 \begin{equation}
-    G_n = L(w_0) + \frac{1}{n}\qty(\ev{nK(w)}_{w|X^n} - \frac{1}{2}\mathbb{E}_X\qty[\mathbb{V}[nf(X,w)]]) + \mathrm{o_p}\qty(\frac{1}{n})
+    G_n = L(w_0) + \frac{1}{n}\qty(n\ev{K(w)}_{w|X^n} - \frac{n}{2}\mathbb{E}_X\qty[\mathbb{V}[f(X,w)]]) + \mathrm{o_p}\qty(\frac{1}{n})
 \end{equation}
-という結果を得る。これは式\eqref{eq:taylor}と（分散の符号を除いて）同じである。
+という結果を得る。これは式\eqref{eq:taylor}と同じである。
 
 \section{分配関数の計算}
 $G_n$を計算するために最後に必要なことは、$f(X,w)$の確率的な振る舞いを明らかにすることである。
@@ -208,7 +208,7 @@ $G_n$を計算するために最後に必要なことは、$f(X,w)$の確率的�
 \begin{equation}
     Z_n^{(0)}(\beta) \approx \qty[1+\underbrace{\frac{\beta}{2}\abs{\xi_n}^2+\cdots}_{\to 0\,(n\to\infty)}]\varphi(w_0)\varDelta_n(w_0)
 \end{equation}
-となり、$n\to\infty$の極限で短冊近似の結果を再現する。
+となり、$n\to\infty$の極限で短冊近似の結果を再現する。（$\xi_n$は$\varDelta_n(w_0)$のゆらぎと考えられる？）
 
 
 \section{第三章の主要な結果}
