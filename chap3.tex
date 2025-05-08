@@ -30,6 +30,37 @@
 
 \begin{document}
 
+\section{Bayes理論の目的}
+Bayes理論は、真の分布$q(x)$、確率モデル$p(x|w)$、事前分布$\varphi(w)$から理論が構築されている。この理論の目的は以下のようにまとめられる：
+\begin{mybox}[Bayes理論の目的]
+    真の分布$q(x)$、確率モデル$p(x|w)$、事前分布$\varphi(w)$が与えられたとき、
+    \begin{equation}
+        D[q\parallel p_n^{*}] \coloneqq \int q(x)\ln\frac{q(x)}{p_n^{*}(x)}\,\dd{x}
+    \end{equation}
+    が$n$の増大に対してどのように$D[q\parallel p_0]$に近づくかを明らかにすることである。
+
+    ここで、$p_{n}^{*}(x)$は我々がサンプル$X^n \sim \prod_{i=1}^{n}q(X_i)$をもとに推測する確率分布であり、
+    ベイズ推測では事後分布$p(w|X^n) \approx \varphi(w)\prod_{i=1}^{n}p(X_i|w)^{\beta}$を用いて
+    \begin{equation}
+        p_{n}^{*}(X) \coloneqq \int p(X|w)p(w|X^n)\,\dd{w}
+    \end{equation}
+    と定義される確率分布である。また、$p_0(x)$はKL Divergenceの意味で$q(x)$に最も近い確率モデルであり、次式で定義される確率分布である：
+    \begin{equation}
+        p_0(x) \coloneqq p(x|w_0), \quad \text{ただし } w_0 = \arg\min_{w} D_{\mathrm{KL}}[q(x) \parallel p(x|w)]\;。
+    \end{equation}
+\end{mybox}
+この目的を達成するために我々が計算すべき量は、
+\begin{equation}
+    D[q\parallel p_n^{*}] - D[q\parallel p_0] = -\int q(x) \ln\frac{p_n^{*}(x)}{p_0(x)}
+\end{equation}
+であり、$n$の増大に対して右辺がどのように0に近づくかを調べる。ベイズ推測の場合では、
+\begin{equation}
+    -\int q(x) \ln\frac{p_n^{*}(x)}{p_0(x)}\,\dd{x} = -\mathbb{E}_{X}\qty[\ln \ev{e^{\ln\frac{p(X|w)}{p(X|w_0)}}}_{w|X^n}]
+\end{equation}
+と表される。
+
+
+
 \section{なんで分配関数を計算するのか？}
 第三章では、（正規化された）分配関数$Z_n^{(0)}(\beta)$の$n\to\infty$極限での振る舞いを調べるのだが、ベイズ統計の枠組みにおいてこのような量を計算する理由がわかりにくい。
 この資料では、分配関数の計算がなぜ必要なのかを説明する。分配関数は
