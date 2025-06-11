@@ -39,7 +39,7 @@ Bayes理論は、パラメータの集合$W \subset \mathbb{R}^d$、真の分布
     予測分布の構成手法はBayes推測、事後確率最大化法、最尤推定法、平均プラグイン法などが存在する。
     たとえばBayes推測を用いた場合では、予測分布を
     \begin{equation}
-        p_{n}^{*}(x) \coloneqq \int p(x|w)p(w|X^n)\,\dd{w}
+        p_{n}^{*}(x) \coloneqq \int p(x|w)p(w|X^n)\,\dd{w} = \ev{p(x|w)}_{w|X^n}
     \end{equation}
     と定める。
     ここで、$p(w|X^n)$は事後分布と呼ばれる確率分布であり、真の分布$q(x)$から得られる$n$個の独立なサンプル$X^n$（データセット）を用いて、
@@ -48,13 +48,41 @@ Bayes理論は、パラメータの集合$W \subset \mathbb{R}^d$、真の分布
     \end{equation}
     と定義される。Bayes理論の主な目的は、予測分布の構成手法としてBayes推測を用いた場合、$n$の増大に対して
     \begin{equation}
-        D_{\text{KL}}[q(x) \parallel p_n^{*}(x)] = \int q(x)\ln\frac{q(x)}{p_n^{*}(x)}\,\dd{x}
-        \label{eq:bayes-goal}
+        D_{\text{KL}}[q(x) \parallel p_n^{*}(x)] = \int q(x)\ln\frac{q(x)}{p_n^{*}(x)}\,\dd{x} = \mathbb{E}_X\qty[\ln\frac{q(x)}{p_n^{*}(x)}]
     \end{equation}
     がどのような振る舞いをするか、すなわちどのように予測分布$p_n^*(x)$が真の分布$q(x)$に近づいていくかを調べることが目的である。
-    また、複数のモデル・予測分布の構成手法に対して、それらの良し悪し（どのような意味での良し悪しかは後で）を定量的に評価できる情報量規準の導入も行う。
+    また、
+    \begin{equation}
+        D_{\text{KL}}[q(x) \parallel p_n^{*}(x)] = \mathbb{E}_X[\ln{q(x)}] - \mathbb{E}_X[\ln{p_n^{*}(x)}]
+    \end{equation}
+    であり、右辺第一項は真の分布のみで定まる定数である。したがって右辺第二項の振る舞いを調べられれば良い。
+    予測分布をBayes推測で構成した場合、
+    \begin{equation}
+        - \mathbb{E}_X\qty[\ln{p_n^{*}(x)}] = -\mathbb{E}_X\qty[\ln\ev{p(X|w)}_{w|X^n}]
+    \end{equation}
+    となり、この値は汎化損失$G_n$と呼ばれるものになっている：
+    \begin{equation}
+        G_n \coloneqq -\mathbb{E}_X\qty[\ln\ev{p(X|w)}_{w|X^n}]\;。
+        \label{eq:bayes-goal}
+    \end{equation}
+    しかし我々は真の分布にアクセスできないため、原理的に$G_n$の値を求めることはできない。
+    Bayes理論の目的を言い換えると、この$G_n$の値をいかにして推定するかということになる\footnote{
+        原理的に計算可能な$T_n$を推定量として見るのではだめ？$G_n$を推定すること自体をしたいわけではない？
+        たぶん情報量規準はこの疑問と関係している気がする。
+    }。特に
+    \begin{itemize}
+        \item 事後分布による期待値計算を如何にして実行するか（原理的には計算可能だが…？）
+        \item 真の分布による期待値計算をどのような推定量として評価するか
+    \end{itemize}
+    ということが重要である。また、$G_n$は出現サンプルに依存した値であることにも注意。
 \end{mybox}
-Bayes理論の目的にあるように、式\eqref{eq:bayes-goal}の$n$に対する振る舞いを調べていく。そのために必要な概念の定義を以下で行う。
+\newpage
+事後分布はモデルと事前分布から定まるため、原理的には計算可能である。実用上では、事後分布やモデルが複雑であれば積分計算が実行できないため、
+積分の収束先からのズレを見るオーダー評価しか行えない。オーダー評価の処方箋を与えているのが正則理論や一般理論と呼ばれる理論である。
+
+{\color{red}{（情報量規準についてまだ理解してないので、この段落は自分の予想）}}真の分布による期待値計算は、原理的に何らかの推定量として扱う必要がある。
+推定量として扱う方法を与えるために、情報量規準と呼ばれる量を導入する。
+そのため、異なる情報量規準を用いると異なる推定結果となり、評価の意味合いが変わってくる。
 
 \subsection{いくつかの概念の定義と本書の仮定について}
 
@@ -62,6 +90,7 @@ Bayes理論の目的にあるように、式\eqref{eq:bayes-goal}の$n$に対す
     パラメータの集合$W$に対し、真の分布$q(x)$とモデル$p(x|w)$の間のKL divergenceを最小にするパラメータの集合を$W_0$と定義する：
     \begin{equation}
         W_0 \coloneqq \{ w \in W \mid w = \arg\min_{w} D_{\mathrm{KL}}[q(x) \parallel p(x|w)] \}
+        \label{eq:optimal-parameter-set}
     \end{equation}
     この集合のことを、真の分布に対して最適なパラメータの集合と呼ぶ。
 \end{mybox}
@@ -81,40 +110,38 @@ Bayes理論の目的にあるように、式\eqref{eq:bayes-goal}の$n$に対す
     \label{fig:katei}
 \end{figure}
 以下の説明は、「相対的に有限な分散を持つ」ことが達成されている、すなわち「最適な分布が実質的にユニーク」な状況を前提にしている。
-したがって、真の分布$q(x)$にKL divergenceの意味で最も近い確率モデルは唯一$p_0(x)$に定まっている。
 \newpage
 
 
-\subsection{Bayes理論の目的を達成するために必要なこと}
-Bayes理論の目的は、$D_{\text{KL}}[q(x) \parallel p_n^{*}(x)]$の$n$に対する振る舞いを調べることである。
-以下では計算の都合上、式\eqref{eq:bayes-goal}の両辺から$D_{\text{KL}}[q(x) \parallel p_0(x)]$（$n$にはよらない定数）を引いた値の振る舞いを考える：
-
+\subsection{事後分布の期待値計算を行いたい}
+本当は、任意のモデルと事前分布の設計に対して
 \begin{equation}
-    D_{\text{KL}}[q(x) \parallel p_n^{*}(x)] - D_{\text{KL}}[q(x) \parallel p_0(x)] = -\int q(x) \ln\frac{p_n^{*}(x)}{p_0(x)}\dd{x}\;。
+    \ln\ev{p(X|w)}_{w|X^n}
 \end{equation}
-予測分布の構成方法としてBayes推測を用いた場合、右辺は
-\begin{equation}
-    -\int q(x) \ln\frac{p_n^{*}(x)}{p_0(x)}\,\dd{x} = -\mathbb{E}_{X}\qty[\ln \ev{e^{\ln\frac{p(X|w)}{p(X|w_0)}}}_{w|X^n}]
-    \label{eq:bayes-sekibun}
-\end{equation}
-と表される。なお、$\ev{\cdots}_{w|X^n}$は事後分布による期待値を表す：
+の計算を行いたい。しかしそれすら難しいので、$n$に対するオーダー評価で我慢する
+\footnote{
+    オーダー評価をしようと思うと、原理的に計算できない量$K(w)$を出現させる必要がある。これは収束先からのズレを見たいためしょうがないのか？
+}。
+$p(X|w)$は$n$に依存しない関数なので、事後分布が$n$に対してどのような振る舞いをしているかを見ればオーダー評価の意味では十分。
+すなわち示すべきことは、$O(x,w)$を$n$に依存しない関数として、
 \begin{equation}
     \ev{O(x,w)}_{w|X^n} \coloneqq \int O(x,w)p(w|X^n)\,\dd{w}\;。
-    \label{eq:expectation}
 \end{equation}
-式\eqref{eq:bayes-sekibun}の$n$の増大に対する振る舞いを見るためには、式\eqref{eq:expectation}を計算する必要がある。
-しかしこの積分を解析的に行うことは不可能であるため、ラプラス近似を用いて$n$に対するオーダー評価として計算することを考える。
-その調査を行えるようにするため、$p(w|X^n)$を天下り的だが（$w$の積分計算にラプラス近似を用いたいため）次のように変形する：
+のオーダー評価を行うことである。それを実行するため、$p(w|X^n)$を天下り的だが（ラプラス近似を用いたいため）次のように変形する：
 \begin{equation}
-    p(w|X^n)\propto \varphi(w)\prod_{i=1}^{n}p(X_i|w)^{\beta} \propto \varphi(w)\exp(-n\beta K_n(w))\;。
+    p(w|X^n)\propto\varphi(w)\prod_{i=1}^{n}p(X_i|w)^{\beta} \propto \varphi(w)\exp(-n\beta K_n(w))\;。
 \end{equation}
 ここで$K_n(w)$は経験誤差関数であり、
 \begin{equation}
     K_n(w) \coloneqq \frac{1}{n}\sum_{i=1}^{n}f(X_i,w) \coloneqq \frac{1}{n}\sum_{i=1}^{n} \ln{\frac{p(X_i|w_0)}{p(X_i|w)}}
 \end{equation}
 と定義される。なお、$f(x,w)$は対数尤度比関数と呼ばれ、$K_n(w)$は$f(x,w)$のサンプル平均である。
-
-このように変形することで、事後分布の確率的な振る舞いを$K_n(w)$に押し付けることができた。
+この変形を用いると、
+\begin{equation}
+    \ev{O(x,w)}_{w|X^n} = \frac{\int_{W} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w}}{\int_{W} \exp(-n\beta K_n(w))\varphi(w)\,\dd{w}}
+    \label{eq:expectation}
+\end{equation}
+となる。このように変形することで、事後分布の確率的な振る舞いを$K_n(w)$に押し付けることができた。
 さらに指数関数の肩が$-n$に比例しているため、$n$が十分に大きな場合、
 式\eqref{eq:expectation}の積分計算に寄与する領域は$K_n(w)$の最小値付近のみと考えることができる。
 したがって、
@@ -163,7 +190,7 @@ $K(w)$は真の分布$q(x)$とモデル設計方法$p(x|w)$に依存して決ま
     \begin{equation}
         \ev{O(x,w)}_{w|X^n} = \frac{\int_{K(w)<\epsilon_n} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w}}{\int_{K(w)<\epsilon_n} \exp(-n\beta K_n(w))\varphi(w)\,\dd{w}} + o_p(\exp(-\sqrt{n}))\;。
     \end{equation}
-    が常に成立する。
+    が常に成立する。なお、$K(w)$がでてきているので、計算できない量になっているのは注意。
 \end{mybox}
 以降は主要項
 \begin{equation}
@@ -267,7 +294,7 @@ $K_n(w)$を平方完成してGauss積分として扱いたいため、平均値�
 \end{equation}
 と平方完成できる。
 
-また、$n\to\infty$のとき$\epsilon_n\to 0$であり、正則理論の仮定1のおかげで、$w^*,\,w^{**}\to w_0$が成立する。したがって
+また、$n\to\infty$のとき$\epsilon_n\to 0$であり、正則理論の仮定1のおかげで、$w^*,\,w^{**}\to w_0$が成立する。したがって一般の$n$ではそこからのズレとして
 \begin{equation}
     J(w^*) = J + o_p(1) ,\quad \grad\eta_n(w^{**}) = \grad\eta_n(w_0) + o_p(1)
 \end{equation}
@@ -286,6 +313,156 @@ $K_n(w)$を平方完成してGauss積分として扱いたいため、平均値�
     \end{align}
 \end{mybox}
 
+\newpage
+\section{正則理論における汎化損失の振る舞い}
+正則理論においては、事後分布による期待値計算のオーダー評価が可能になった。その結果を用いると$G_n$は
+\begin{equation}
+    G_n = -\mathbb{E}_X\qty[\ln\ev{p(X|w)}_{w|X^n}] = L(w_0) + \frac{1}{n}\qty(\frac{d}{2\beta} + \frac{1}{2}\norm{\xi_n}^2 - \frac{1}{2\beta}\tr{IJ^{-1}}) + o_p\qty(\frac{1}{n})
+\end{equation}
+となる。これには原理的に計算が不可能な量が入っており、これは
+\begin{itemize}
+    \item 真の分布による期待値を外から取ったから
+    \item 事後分布の期待値計算をオーダー評価するために収束先の値を見たから
+\end{itemize}
+という2つの理由がある。真の分布をしらないと計算不可能な量は
+\begin{align}
+    L(w_0) &= -\mathbb{E}_X[\ln{p(X|w_0)}]\;,  \\
+    \xi_n &= J^{-1/2}\grad{\eta_n(w_0)}\;, \\
+    I = I(w_0) &= \mathbb{E}_{X}\qty[\grad{f(X,w_0)}(\grad{f(X,w_0)})^\top] - \grad{K(w_0)}(\grad{K(w_0)})^{\top}\;, \\
+    J = J(w_0) &= \laplacian{K(w_0)}
+\end{align}
+である。また、$w_0$の値も真の分布をしらないと求められない。いったいこれからどうするのか。ちなみに経験損失$T_n$は原理的に計算できる：
+\begin{equation}
+    T_n = -\frac{1}{n}\sum_{i=1}^{n}\ln\ev{p(X_i|w)}_{w|X^n}\;。
+\end{equation}
+経験損失のオーダー評価は
+\begin{equation}
+    T_n = L_n(w_0) + \frac{1}{n}\qty(\frac{d}{2\beta}-\frac{1}{2}\norm{\xi_n}^2-\frac{1}{2\beta}\tr{IJ^{-1}}) + o_p\qty(\frac{1}{n})
+\end{equation}
+となる。
+\begin{align}
+    L_n(w_0) = -\frac{1}{n}\sum_{i=1}^{n}\ln{p(X_i|w_0)}\;, \\
+\end{align}
+は$\omega_0$を別の量に置き換えれば計算可能ではある。
+また、サンプルによる期待値を取ると、
+\begin{align}
+    \mathbb{E}[G_n] &= L(w_0) + \frac{1}{n}\qty(\frac{\lambda-\nu}{\beta}+\nu) + o\qty(\frac{1}{n})\;, \\
+    \mathbb{E}[T_n] &= L(w_0) + \frac{1}{n}\qty(\frac{\lambda-\nu}{\beta}-\nu) + o\qty(\frac{1}{n})
+\end{align}
+と表される。ここで
+\begin{equation}
+    \lambda=\frac{d}{2},\quad \nu=\frac{1}{2}\tr{IJ^{-1}}
+\end{equation}
+である。
+
+\newpage
+
+\section{Bayes推測以外の方法で予測分布を構成する}
+予測分布の構成方法としてBayes推測以外の手法を用いた場合にどのようになるかを説明する。
+特に、最尤推定法と事後確率最大化法（MAP推定法）が統一的に説明できることを述べる。これらはパラメータを点推定するような方法である。
+まず、ハイパーパラメータ$\beta>0$に依存する関数
+\begin{equation}
+    \mathcal{L}_n(\beta) \coloneqq -\frac{1}{n}\sum_{i=1}^{n}\ln{p(X_i|w)} - \frac{1}{n\beta}\ln{\varphi(w)}
+\end{equation}
+を最小にするパラメータを$\hat{w}^{\beta}_{n}$とおく。このようなパラメータが唯一とは限らない。
+このとき、予測分布を
+\begin{equation}
+    p_n^{*}(x) = p(X|\hat{w}^{\beta}_{n})
+\end{equation}
+と定義する。$\beta\to\infty$とした場合が最尤推定
+\footnote{
+    最尤推定はデータを完全に信じてモデルの対数尤度を最大化するパラメータを選択するような推定方法であるため過学習を起こしやすい？
+}
+であり、$\beta=1$とした場合が事後確率最大化法（MAP推定）に対応する。
+すなわち$\beta$は事前分布と学習データをどれくらい重視するかを調整する意味を持っている。
+
+
+\begin{mybox}[推定量の一致性]
+    式\eqref{eq:optimal-parameter-set}で定義した集合$W_0$の元が唯一$w_0$であるとき、
+    任意の$\beta$について、$n\to\infty$のとき$K(\hat{w}_n^{\beta})$の値は$0$に確率収束する。
+    また、正則理論を仮定していれば、$\hat{w}_n^{\beta}\to w_0$に確率収束する。
+\end{mybox}
+
+
+
+
+
+\newpage
+
+\section{情報量規準}
+この章は自分の中でその意味を捉えられていないまま書いています。
+\begin{itemize}
+    \item $G_n$そのものを情報量規準で推定したいわけではない？
+    \item $G_n$のオーダー評価の結果を用いて計算できない量は微小量として扱えるようにし、主要項は計算できる量で推定したい？
+    \item $\mathbb{E}[G_n]$の意味で、主要項は計算できる量で推定したい？
+\end{itemize}
+
+\subsection{BIC}
+BICの定義は次である：
+\begin{equation}
+    \text{BIC} \coloneqq -\sum_{i=1}^{n}\ln{p(X_i|\hat{w}_n^{\beta})} + \frac{d}{2}\ln{n}
+\end{equation}
+
+複数のモデルの比較においてBICが小さいほど適切であると考えるとき、この値のことをベイズ情報量規準という。
+
+BICは、真の分布は単純なモデルで表現できるということがわかっているときに使うような指標だと思った。
+BICが他の指標と違うのは、$n$に比例する項が入っていることであり、たとえば$n\to\infty$を考える（真の分布が再現できるほどデータが与えられている）場合を考えると、
+任意の$X\sim q(x)$に対して$p(X|\hat{w})$がゼロにならない$\hat{w}$が存在するくらいの表現能力を持つ$d$の中で、一番小さい$d$をもつモデルを選ぶことになる。
+つまり真の分布を再現できる表現能力を持つもののうち、最も単純なモデルが選ばれる
+
+\begin{mybox}[BICについて定性的に理解する]
+    解釈をしやすくするために$d$が同じモデルを2つ持ってきて、$\beta$も固定する。データセットも同じものを用意する。事前分布も同じにする。
+    もっともらしいパラメータ$\hat{w}_{n}^{\beta}$を決めたとき、BICが小さいほうが適切ということは、予測分布$p_n^{*}(x)$に関する対数尤度
+    \begin{equation}
+        \sum_{i=1}^{n}\ln p_n^{*}(X_i)
+    \end{equation}
+    が大きいモデルのほうが適切であるということを意味する。これは最尤推定法を擬似的に利用したいということ？
+    また、表現能力が必要以上に高すぎると過学習のおそれがあるので、同じくらいの表現能力を持っているモデルでは、よりパラメータが少ないモデルを選択している。
+    これ以上の意味はわからない。自由エネルギーの主要項がBICそのものらしいので、自由エネルギーの意味を理解しないといけない気がする。
+\end{mybox}
+
+
+\newpage
+\subsection{RIC}
+RICの定義は次である：
+\begin{equation}
+    \text{RIC} \coloneqq T_n + \frac{1}{n}\tr{IJ^{-1}}\;。
+\end{equation}
+これは計算できない量である。しかし、RICの$1/n$よりも大きなオーダー項はすべて計算できる量としてまとめられる：
+\begin{equation}
+    \text{RIC} = L_n(\hat{w}_n^{\beta}) + \frac{1}{n}\qty(\frac{d}{2\beta} + \qty(1-\frac{1}{2\beta}\tr{I_n(\hat{w}_n^{\beta})J_n(\hat{w}_n^{\beta})^{-1}})) + o_p\qty(\frac{1}{n})\;。
+\end{equation}
+ここで計算できる新たな量として
+\begin{align}
+    I_n(w) &\coloneqq \frac{1}{n}\sum_{i=1}^{n}\grad{\ln{p(X_i|w)}}(\grad{\ln{p(X_i|w)}})^{\top} \\
+    J_n(w) &\coloneqq -\frac{1}{n}\sum_{i=1}^{n}\laplacian\ln{p(X_i|w)} \\
+\end{align}
+を定義した。この量は、大数の法則と$\hat{w}_n^{\beta}\to w_0$を用いて
+\begin{equation}
+    I(w_0)=I_n(\hat{w}_n^{\beta}) + o_p(1),\quad J(w_0) = J_n(\hat{w}_n^{\beta}) + o_p(1)
+\end{equation}
+となることが示せるらしい。
+
+RICでは常に
+\begin{equation}
+    \mathbb{E}[G_n] = \mathbb{E}[\text{RIC}] + o\qty(\frac{1}{n})
+\end{equation}
+が成立する。よって$1/n$より大きなオーダーにおいて、汎化損失$G_n$のサンプル期待値を推定したいのが目的な気がする。
+本当はチューニングしきったモデルの中で$G_n$が小さくなる方がどちらであるかを見たいんだけど、それが難しくてサンプル期待値の意味でしか見れないということ。
+
+\subsection{TIC}
+TICはいらない。RICと完全に同じ意味を持つと思う。Bayes以外の推定方法に対応する汎化損失を使ってるだけ。
+
+\subsection{AIC}
+AICは大事な量である。実現可能な場合の話をしていたのは、単純に平均が一致することを示したかったためだけだと思う。たしかに実現可能だったらAICはRICと同じになる。
+
+AICは感度が高い（サンプルに依存して判定が変わってしまう）ような指標である。
+
+このような指標で選ばれ続けるモデルは、どのようなサンプルが与えられても適切なモデル（AICの意味で常に低い量を出し続けるモデル）と解釈できる。
+つまり新しいサンプルに対して堅牢なモデルを選びたいときに使う気がする。AICとBICの用途は完全に違うものな気がする。
+
+
+BICは感度が低い。つまりサンプルが信頼できるような場合に使えるもの。信頼できないのに感度が低い指標を使っちゃうと、決めつけで適当なモデルになる。
 
 
 
