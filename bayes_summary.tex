@@ -82,6 +82,8 @@ Bayes理論の目的にあるように、式\eqref{eq:bayes-goal}の$n$に対す
 \end{figure}
 以下の説明は、「相対的に有限な分散を持つ」ことが達成されている、すなわち「最適な分布が実質的にユニーク」な状況を前提にしている。
 したがって、真の分布$q(x)$にKL divergenceの意味で最も近い確率モデルは唯一$p_0(x)$に定まっている。
+\newpage
+
 
 \subsection{Bayes理論の目的を達成するために必要なこと}
 Bayes理論の目的は、$D_{\text{KL}}[q(x) \parallel p_n^{*}(x)]$の$n$に対する振る舞いを調べることである。
@@ -100,7 +102,8 @@ Bayes理論の目的は、$D_{\text{KL}}[q(x) \parallel p_n^{*}(x)]$の$n$に対
     \ev{O(x,w)}_{w|X^n} \coloneqq \int O(x,w)p(w|X^n)\,\dd{w}\;。
     \label{eq:expectation}
 \end{equation}
-式\eqref{eq:bayes-sekibun}の$n$の増大に対する振る舞いを見るためには、式\eqref{eq:expectation}の$n$に対する振る舞いを調べることがすべてである。
+式\eqref{eq:bayes-sekibun}の$n$の増大に対する振る舞いを見るためには、式\eqref{eq:expectation}を計算する必要がある。
+しかしこの積分を解析的に行うことは不可能であるため、ラプラス近似を用いて$n$に対するオーダー評価として計算することを考える。
 その調査を行えるようにするため、$p(w|X^n)$を天下り的だが（$w$の積分計算にラプラス近似を用いたいため）次のように変形する：
 \begin{equation}
     p(w|X^n)\propto \varphi(w)\prod_{i=1}^{n}p(X_i|w)^{\beta} \propto \varphi(w)\exp(-n\beta K_n(w))\;。
@@ -109,54 +112,178 @@ Bayes理論の目的は、$D_{\text{KL}}[q(x) \parallel p_n^{*}(x)]$の$n$に対
 \begin{equation}
     K_n(w) \coloneqq \frac{1}{n}\sum_{i=1}^{n}f(X_i,w) \coloneqq \frac{1}{n}\sum_{i=1}^{n} \ln{\frac{p(X_i|w_0)}{p(X_i|w)}}
 \end{equation}
-と定義される。なお、$f(x,w)$は対数尤度比関数と呼ばれる。
-このように変形することで、事後分布の確率的な振る舞いを$K_n(w)$に押し付けることができた。さらに指数関数の肩が$-n$に比例しているため、
-$n$が十分に大きな場合、式\eqref{eq:expectation}の積分計算に寄与する領域は$K_n(w)$の最小値付近のみと考えることができる。したがって、
+と定義される。なお、$f(x,w)$は対数尤度比関数と呼ばれ、$K_n(w)$は$f(x,w)$のサンプル平均である。
+
+このように変形することで、事後分布の確率的な振る舞いを$K_n(w)$に押し付けることができた。
+さらに指数関数の肩が$-n$に比例しているため、$n$が十分に大きな場合、
+式\eqref{eq:expectation}の積分計算に寄与する領域は$K_n(w)$の最小値付近のみと考えることができる。
+したがって、
 \begin{enumerate}
     \item $K_n(w)$の最小値を取る点が、パラメータ空間$W$全体でどのような分布をしているか
     \item $K_n(w)$の最小値周りにおける関数の局所的な振る舞い
 \end{enumerate}
 を調べることが重要である。
-$K_n(w)$の$w$に対する振る舞い方は、真の分布とモデル設計に依存して決まるため、まずは正則理論という枠組みの元で$K_n(w)$の振る舞いを考える。
+$K_n(w)$の$w$に対する振る舞い方は、真の分布とモデル設計に依存して決まるため、第三章では正則理論という枠組みの元で$K_n(w)$の振る舞いを考える。
+なお、$n\to\infty$極限における$K_n(w)$の収束先を平均誤差関数$K(w)$と呼ぶ：
+\begin{equation}
+    K_n(w)\to K(w) \coloneqq \mathbb{E}_{X}[f(X,w)] = \int f(x,w)q(x)\,\dd{x}\;。
+\end{equation}
+$K(w)$は真の分布$q(x)$とモデル設計方法$p(x|w)$に依存して決まる関数である。
+\newpage
+
+
+\subsection{期待値計算の評価において一般的に成り立つ事実}
+
+\begin{mybox}[期待値計算における積分の分割]
+    事後分布による期待値計算は以下の形で表される：
+    \begin{equation}
+      \ev{O(x,w)}_{w|X^n}=\frac{\int_{W} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w}}{\int_{W} \exp(-n\beta K_n(w))\varphi(w)\,\dd{w}}\;。
+    \end{equation}
+    分母は分子の積分において$O(x,w)=1$を代入した形であるため、分子の$n$に対する振る舞いを見れば全体の振る舞いがわかる。
+    分子の積分領域を2つに分割し、$n$に対する主要項（第一項目）、非主要項（第二項目）へと分割する：
+    \footnote{
+        主要項、非主要項という言葉は、各項のオーダー評価が意味をなすくらい$n$が大きな領域ということを前提に使っている。
+        また、二項目が非主要項であることは、第一項目の評価を行って初めて分かる事実ではあるが、それは認めてください。
+    }
+    \footnote{
+        $O(x,w)$は$n$に依存していない関数であることを前提としており、これが$n$に依存していればオーダー評価も変わってくる。
+    }
+    \begin{equation}
+         \int_{K(w)<\epsilon_n} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w} + \int_{K(w)\geq \epsilon_n} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w}\;。
+    \end{equation}
+    ただし、値$\epsilon_n>0$は$n$の単調減少関数であり、
+    \begin{equation}
+        \lim_{n\to\infty} \epsilon_n = 0 ,\quad \lim_{n\to\infty} \sqrt{n}\epsilon_n = \infty
+    \end{equation}
+    を満たすように選ぶ。このとき、非主要項（第二項目）は正則理論の仮定なしで、
+    \begin{equation}
+        \int_{K(w)\geq \epsilon_n} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w} = o_p(\exp(-\sqrt{n}))
+    \end{equation}
+    になることが示される。この事実を示すために必要なのは$K_n(w)$の$n$に対する振る舞いの調査のみであり、正則理論の仮定は必要なく常に成り立つ。したがって、
+    \begin{equation}
+        \ev{O(x,w)}_{w|X^n} = \frac{\int_{K(w)<\epsilon_n} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w}}{\int_{K(w)<\epsilon_n} \exp(-n\beta K_n(w))\varphi(w)\,\dd{w}} + o_p(\exp(-\sqrt{n}))\;。
+    \end{equation}
+    が常に成立する。
+\end{mybox}
+以降は主要項
+\begin{equation}
+    \int_{K(w)<\epsilon_n} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w} 
+\end{equation}
+のオーダー評価を行う。$K(w)$に性質の良い仮定を課してオーダー評価を行っているのが正則理論（第三章）であり、そうでない場合は一般理論（第四章）である。
+\footnote{
+    $K_n(w)$ではなく$K(w)$に仮定を課していることには注意。正則理論の枠組みでは、$K(w) < \epsilon_n$の領域内部において
+    \begin{equation}
+        \exp(-n\beta K_n(w))\propto  \mathcal{N}\qty(w_0 + \hat{\xi}_n/\sqrt{n}, (n\beta J(w_0))^{-1})(1+o_p(1))
+    \end{equation}
+    と表される。なお、$J(w_0)$は正定値行列で、$J(w)=\laplacian{K(w)}$と定義されている。また、$\hat{\xi}_n$は$K_n(w_0)$の確率的な振る舞いを担う確率変数である。
+    積分領域はこの分布の広がりよりも十分に大きく、$\mathbb{R}^d$全体での積分に置き換えてGauss積分が適用できる。
+}
 
 \section{正則理論}
-正則理論とは、以下の3つの条件を真の分布とモデル設計に課す理論である：
-\begin{enumerate}
-    \item 最適なパラメータの集合は唯一の元からなる：
+\subsection{正則理論での仮定}
+正則理論とは、真の分布とモデル設計（と、サンプルの数）が、以下の3つの条件を満たすことを仮定する理論である
+\footnote{
+    本では$K(w)$ではなく$L(w)$についての仮定をしていたが、これらは基準点を変えただけであり、
     \begin{equation}
-        W_0 = \{w_0\}\;。
+        L(w) = L(w_0) + K(w)
     \end{equation}
-    これは$K(w)$を最小にするパラメータが唯一$w_0$であることと同値である。
-    \item $K(w)$のヘシアン$\laplacian{K(w)}$の$w=w_0$における値が正定値である。
-    \item サンプルの数$n$が非常に大きいこと。
+    によって結びつけられるため、$K(w)$に関する仮定として考えても良い。なお、$L(w)$は平均対数損失であり、
+    \begin{equation}
+        L(w) = -\mathbb{E}_X[\ln{p(X|w)}]
+    \end{equation}
+    と定義される。
+}：
+\begin{enumerate}
+    \item $K(w)$を最小にするパラメータが唯一$w_0$である。これは、最適なパラメータの集合が$W_0=\{w_0\}$と表されることと同じ意味である。
+    \item $K(w)$のHessian：$J(w)=\laplacian{K(w)}$に対し、$J\coloneqq J(w_0)$が正定値である。
+    \item サンプルの数$n$が十分に大きいこと。
 \end{enumerate}
 
-正則理論の
+これらの仮定によって、
+\begin{itemize}
+    \item 主要項の積分範囲を考える際には$w=w_0$の近傍のみでよくなる。
+    \item $w=w_0$近傍で主要項の被積分関数はGaussianとして扱える。
+\end{itemize}
+という嬉しい性質が成り立つ。結論だけ述べると、この仮定の元で主要項のオーダー評価は次のようになる。
+\begin{mybox}[期待値のオーダー評価（正則理論の場合）]
+    正則理論という仮定を課している場合、以下のオーダー評価が成立する：
+    \begin{align}
+    \ev{O(x,w)}_{w|X^n} = \frac{\int_{\mathbb{R}_d} O(x,w)\exp(-\frac{n\beta}{2}\norm{J^{1/2}\qty(w-w_0-\frac{\hat{\xi}_n}{\sqrt{n}})}^2)\dd{w}}
+    {\int_{\mathbb{R}_d} \exp(-\frac{n\beta}{2}\norm{J^{1/2}\qty(w-w_0-\frac{\hat{\xi}_n}{\sqrt{n}})}^2)\dd{w}}(1+o_p(1))\;。
+    \end{align}
+\end{mybox}
+2章の残りでは、この計算途中で大事だと思われる式変形について説明する。
+\newpage
 
-\section{正則理論の場合}
-
-
-
-
-
-天下り的ではあるが、$K_n(w)$を次のように変形する：
+\subsection{正則理論で用いる文字の定義}
+正則理論の仮定の元での主要項の振る舞いの結果を述べる前に、少しだけ文字の定義を行う。
+まずは$K_n(w)$を次のように変形する：
 \begin{equation}
     K_n(w) = K(w) - (K(w)-K_n(w)) = K(w) - \frac{1}{\sqrt{n}}\eta_n(w)\;。
 \end{equation}
-ここで
+ここで$\eta_n(w)$は$K_n(w)$の確率的な振る舞い方を担う確率過程であり、次のように定義される：
+\begin{equation}
+    \eta_n(w)\coloneqq \frac{1}{\sqrt{n}}\sum_{i=1}^{n}(K(w)-f(X_i,w))\;。
+\end{equation}
+この確率過程は経験過程と呼ばれるものであり、$n\to\infty$でとある確率過程に法則収束するという良い性質を持っている。
+この性質があることで、収束先の確率分布からのズレとして$K_n(w)$をオーダー評価することが可能になる。必要となる確率変数$\xi_n,\,\hat{\xi}_n$を
+\begin{align}
+    \xi_n &= J^{-1/2}(w_0)\grad{\eta_n(w_0)} \;、\\
+    \hat{\xi}_n &= J^{-1/2}(w_0)\xi_n = J^{-1}\grad{\eta_n(w_0)}
+\end{align}
+と定義する。$\grad{\eta_n(w)}$がすべての$w$で$\mathcal{N}(0,I(w))$に法則収束するという性質を持っているため、
+\begin{itemize}
+    \item 確率変数$\xi_n$は正規分布$\mathcal{N}(0,J^{-1/2}IJ^{-1/2})$に法則収束する。
+    \item 確率変数$\hat{\xi}_n$は正規分布$\mathcal{N}(0,J^{-1}IJ^{-1})$に法則収束する。
+\end{itemize}
+ここで$I=I(w_0)$であり、$I(w)$は以下で定義される：
+\begin{equation}
+    I(w) \coloneqq \mathbb{E}_{X}\qty[\grad{f(X,w)}(\grad{f(X,w)})^\top] - \grad{K(w)}(\grad{K(w)})^{\top}\;。
+\end{equation}
 
+\subsection{正則理論における主要項のオーダー評価}
+正則理論の仮定のもとでは、$w=w_0$近傍の$K_n(w)$の振る舞いを見れば良い。
+$K_n(w)$を平方完成してGauss積分として扱いたいため、平均値の定理を利用して$w=w_0$周りの展開を考える。
+そのため
+\begin{equation}
+    K_n(w) = K(w) - \frac{1}{\sqrt{n}}\eta_n(w)
+\end{equation}
+の右辺の項にそれぞれ平均値の定理を用いると、$w$により定まる2つの値$w^*,\,w^{**}$が存在し、
+\begin{align}
+    K(w) &= \frac{1}{2}(w-w_0)\cdot J(w^*)(w-w_0)\;, \\
+    \eta_n(w) &= (w-w_0)\cdot \grad\eta_n(w^{**})\;。
+\end{align}
+が成立する。$K(w)$の一次項が出てこないのは、$\grad K(w_0)=0$が成立しているためである。
+これらの結果から、$K_n(w)$は$w$の二次式として表される：
+\begin{equation}
+    K_n(w) = \frac{1}{2}(w-w_0)\cdot J(w^*)(w-w_0) - \frac{1}{\sqrt{n}}(w-w_0)\cdot\grad\eta_n(w^{**})\;。
+\end{equation}
+なお、平方完成を行うためには$J(w^*)$が正則（対角化可能）であることが必要である。
+本では、$w^*$が$w_0$近傍では$J(w^*)$が常に正則ということを仮定しているが、その妥当性がどこから来ているのかは不明。
+正則であることを認めたうえで、$K_n(w)$は
+\begin{equation}
+    nK_n(w) = \frac{n}{2}\norm{J(w^*)^{1/2}\qty(w-w_0-\frac{1}{\sqrt{n}}J(w^*)^{-1}\grad\eta_n(w^{**}))}^2 
+    - \frac{1}{2}\norm{J(w^*)^{-1/2}\grad\eta_n(w^{**})}^2
+\end{equation}
+と平方完成できる。
 
-
-
-
-
-\begin{mybox}[事後分布の振る舞い（正則理論の場合）]
-    正則理論という仮定を課している場合、式\eqref{eq:expectation}の振る舞いは次のように表される：
-    \begin{equation}
-        \ev{O(x,w)}_{w|X^n}
-         = \frac{\int O(x,w)\exp(-\frac{n\beta}{2}\abs{J^{1/2}(w-w_0-\frac{\hat{\xi_n}}{\sqrt{n}})})dw}
-         {\int \exp(-\frac{n\beta}{2}\abs{J^{1/2}(w-w_0-\frac{\hat{\xi_n}}{\sqrt{n}})})dw}(1+o_p(1))
-    \end{equation}
+また、$n\to\infty$のとき$\epsilon_n\to 0$であり、正則理論の仮定1のおかげで、$w^*,\,w^{**}\to w_0$が成立する。したがって
+\begin{equation}
+    J(w^*) = J + o_p(1) ,\quad \grad\eta_n(w^{**}) = \grad\eta_n(w_0) + o_p(1)
+\end{equation}
+が成立する。このオーダー評価の結果を用いると、主要項は次のように表せる：
+\begin{align}
+    &\int_{K(w)<\epsilon_n} O(x,w)\exp(-n\beta K_n(w))\varphi(w)\,\dd{w} \notag \\
+    =& \exp(\frac{\beta}{2}\norm{\xi_n}^2)\varphi(w_0)\int_{K(w)<\epsilon_n} O(x,w)\exp(-\frac{n\beta}{2}\norm{J^{1/2}\qty(w-w_0-\frac{\hat{\xi}_n}{\sqrt{n}})}^2)\dd{w}(1+o_p(1)) \notag \\
+    =& \exp(\frac{\beta}{2}\norm{\xi_n}^2)\varphi(w_0)\int_{\mathbb{R}^d} O(x,w)\exp(-\frac{n\beta}{2}\norm{J^{1/2}\qty(w-w_0-\frac{\hat{\xi}_n}{\sqrt{n}})}^2)\dd{w}(1+o_p(1))\;。
+\end{align}
+最後の等式は、積分範囲を$\mathbb{R}^d$全体に広げてもよいということを利用している。これにより、先ほど提示したオーダー評価の形が得られる：
+\begin{mybox}[期待値のオーダー評価（正則理論の場合）]
+    正則理論という仮定を課している場合、以下のオーダー評価が成立する：
+    \begin{align}
+    \ev{O(x,w)}_{w|X^n} = \frac{\int_{\mathbb{R}_d} O(x,w)\exp(-\frac{n\beta}{2}\norm{J^{1/2}\qty(w-w_0-\frac{\hat{\xi}_n}{\sqrt{n}})}^2)\dd{w}}
+    {\int_{\mathbb{R}_d} \exp(-\frac{n\beta}{2}\norm{J^{1/2}\qty(w-w_0-\frac{\hat{\xi}_n}{\sqrt{n}})}^2)\dd{w}}(1+o_p(1))\;。
+    \end{align}
 \end{mybox}
 
 
